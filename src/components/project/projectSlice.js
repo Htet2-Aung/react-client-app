@@ -29,7 +29,6 @@ const initialState = {
     status:'idle',
     error:null
 }
-
 export const projectSlice = createSlice({
     name:'projects',
     initialState,
