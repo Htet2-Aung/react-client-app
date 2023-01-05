@@ -1,32 +1,53 @@
-import { useDispatch } from "react-redux";
+import { useDispatch,useSelector } from "react-redux";
 import { useState } from "react";
-import { addNewProject } from "../project/projectSlice";
-function AddProjectForm(){
-   
-    const [projectName,setProjectName] = useState('');
-    const [projectIdentifier,setProjectIdentifier] = useState("");
-    const [description,setdescription] = useState("");
-    const [startDate,setStartDate] = useState("");
-    const [endDate,setEndDate] = useState("");
+import { addNewProject,selectProjectByIdentifier,updateProject } from "../project/projectSlice";
+import { useParams } from "react-router-dom";
+
+
+function AddProjectForm(props){
+    const { projectId }= useParams()
+    const project = useSelector((state)=>selectProjectByIdentifier(state,String(projectId)))
+    console.log(projectId)
+    console.log(project)
+    const [projectName,setProjectName] = useState(project?.projectName);
+    const [projectIdentifier,setProjectIdentifier] = useState(project?.projectIdentifier);
+    const [description,setdescription] = useState(project?.description);
+    const [startDate,setStartDate] = useState(project?.startDate);
+    const [endDate,setEndDate] = useState(project?.endDate);
     const [addRequestStatus,setaddRequestStatus] = useState('idle')
+    
 
     const onProjectNameChange = e => setProjectName(e.target.value);
     const onProjectIdentifierChange = e => setProjectIdentifier(e.target.value);
     const onDescriptionChange = e => setdescription(e.target.value);
     const onStartDateChange = e => setStartDate(e.target.value);
     const onEndDateChange = e => setEndDate(e.target.value);
-    const canSave = [projectName,projectIdentifier,description,startDate,endDate].every(Boolean) && addRequestStatus==='idle';
 
+    
+    
+    
+
+    const canSave = [projectName,projectIdentifier,description,startDate,endDate].every(Boolean) && addRequestStatus==='idle';
+    const isEdit =  (props.mode === 'edit' )
     const dispatch = useDispatch();
 
     const onSubmit = (event)=>{
         event.preventDefault();
         if(canSave){
+
             try {
 
                 setaddRequestStatus('pending');
 
                 dispatch(
+                    isEdit?
+                    updateProject({
+                        projectName,
+                        projectIdentifier,
+                        description,
+                        startDate,
+                        endDate
+                    }):
                   addNewProject({
                         projectName,
                         projectIdentifier,
@@ -73,6 +94,7 @@ return (
                             placeholder="Unique Project ID"
                             value={projectIdentifier}
                             onChange={onProjectIdentifierChange}
+                            disabled={ isEdit }
                                 />
                         </div>
                       
@@ -100,7 +122,11 @@ return (
                             onChange={onEndDateChange} />
                         </div>
 
-                        <input type="submit" className="btn btn-primary btn-block mt-4" disabled={!canSave}/>
+                        <input type="submit" 
+                        className="btn btn-primary btn-block mt-4" 
+                        disabled={!canSave}
+                        value={ isEdit?'Update':'save'}
+                        />
                     </form>
                 </div>
             </div>
